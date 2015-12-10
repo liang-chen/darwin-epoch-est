@@ -13,12 +13,6 @@ def KL_pair_trivial(KL_matrix):
 
         local_kl = i + random.random()/10 
         global_kl = i + random.random()/10
-        #if(i == 0):
-         #   local_kl = 0
-          #  global_kl = 0
-        #else:
-         #   local_kl = row[i-1]
-          #  global_kl = sum(row[:i])/i
         pList.append([local_kl, global_kl])
     pairs = np.array(pList)
     return pairs
@@ -70,13 +64,19 @@ def learn_KL_gaussian(k_means, pairs):
         my_cov = np.cov(my_data, rowvar = 0)
         print my_cov
         kGaussians.append(mGaussian(my_center, my_cov))
-    return np.array(kGaussians)
+    return kGaussians
 
 def learn_from_KL(KL_matrix, n):
     pairs = KL_pair(KL_matrix)
-    pairs_t = KL_pair_trivial(KL_matrix)
-    k_means = KMC(pairs, n)
-    k_means_t = KMC(pairs_t, n)
-    kGaussians = learn_KL_gaussian(k_means_t, pairs)
-    return pairs, kGaussians
+    #pairs_t = KL_pair_trivial(KL_matrix)
 
+    k_means_list = []
+
+    for i in xrange(1, n+1):
+        k_means_list.append(KMC(pairs, i))
+
+    #k_means_t = KMC(pairs_t, n)
+    kGaussians = []
+    for k_means in k_means_list:
+        kGaussians = kGaussians + learn_KL_gaussian(k_means, pairs)
+    return pairs, np.array(kGaussians)

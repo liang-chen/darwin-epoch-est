@@ -24,6 +24,8 @@ def model_state_transit_okay(m1, m2):
 def init_state_list(k, n):
     """ We have k models and want to estimate n epochs """
     global model_state_list
+    print "caught you"
+    print k,n
     for i in xrange(k):
         for j in xrange(n):
             mState = ModelState(i,j)
@@ -90,6 +92,6 @@ def decoding(pairs, kGaussians, n_epochs):
         best_states.insert(0, best_state)
     print best_states
 
-def estimate_epochs(pairs, kGaussians):
+def estimate_epochs(pairs, kGaussians, n_epochs):
     """wrapper: set the number of epochs to be the same with possible models"""
-    decoding(pairs, kGaussians, len(kGaussians))
+    decoding(pairs, kGaussians, n_epochs)
