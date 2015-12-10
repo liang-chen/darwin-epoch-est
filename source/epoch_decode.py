@@ -81,6 +81,8 @@ def decoding(pairs, kGaussians, n_epochs):
             temp_score = scores[j][i]
             best_state = j
 
+    print "best score", temp_score
+
     best_states = [best_state]
     print "trace back....."
     for i in reversed(range(1,n_data)):

@@ -22,7 +22,7 @@ def main():
         
     data = np.array(dat_rows)
     
-    pairs, kGaussians = learn_from_KL(data,1)
+    pairs, kGaussians = learn_from_KL(data,)
     estimate_epochs(pairs, kGaussians)
 
 if __name__ == "__main__":

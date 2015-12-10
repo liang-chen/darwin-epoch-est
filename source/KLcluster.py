@@ -3,12 +3,31 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from myClass import mGaussian
+import random
+
+#simple experiment
+def KL_pair_trivial(KL_matrix):
+    pList = []
+    for i in xrange(len(KL_matrix)):
+        row = KL_matrix[i,:]
+
+        local_kl = i + random.random()/10 
+        global_kl = i + random.random()/10
+        #if(i == 0):
+         #   local_kl = 0
+          #  global_kl = 0
+        #else:
+         #   local_kl = row[i-1]
+          #  global_kl = sum(row[:i])/i
+        pList.append([local_kl, global_kl])
+    pairs = np.array(pList)
+    return pairs
 
 def KL_pair(KL_matrix):
     pList = []
     for i in xrange(len(KL_matrix)):
         row = KL_matrix[i,:]
-
+        
         if(i == 0):
             local_kl = 0
             global_kl = 0
@@ -25,7 +44,7 @@ def KMC(pairs, n): #kmeans clustering on kl distance pairs
     k_means_labels = k_means.labels_
     k_means_cluster_centers = k_means.cluster_centers_
     k_means_labels_unique = np.unique(k_means_labels)
-    colors = ['#4EACC5', '#FF9C34', '#4E9A06', '#FFD700', '00FF7F', 'B22222', 'D02090', 'EED5B7']
+    colors = ['#4EACC5', '#FF9C34', '#4E9A06', '#FFD700', '#00FF7F', '#B22222', '#D02090', '#EED5B7']
 
     # KMeans Plot
     fig = plt.figure(figsize=(8, 3))
@@ -46,7 +65,7 @@ def learn_KL_gaussian(k_means, pairs):
     kGaussians = []
     for k in range(n):
         my_members = k_means_labels == k
-        my_center = k_means_cluster_centers[k]
+        my_center = sum(pairs[my_members,:]) / len(pairs[my_members,:])#k_means_cluster_centers[k]
         my_data = pairs[my_members,:]
         my_cov = np.cov(my_data, rowvar = 0)
         print my_cov
@@ -55,7 +74,9 @@ def learn_KL_gaussian(k_means, pairs):
 
 def learn_from_KL(KL_matrix, n):
     pairs = KL_pair(KL_matrix)
+    pairs_t = KL_pair_trivial(KL_matrix)
     k_means = KMC(pairs, n)
-    kGaussians = learn_KL_gaussian(k_means, pairs)
+    k_means_t = KMC(pairs_t, n)
+    kGaussians = learn_KL_gaussian(k_means_t, pairs)
     return pairs, kGaussians
 
