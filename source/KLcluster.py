@@ -1,9 +1,11 @@
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 from sklearn.cluster import KMeans
 from myClass import mGaussian
-from math import log
+from math import log, sqrt
 import random
 
 def get_kl_dist(list_p,list_q):
@@ -18,8 +20,7 @@ def get_mean_cols(matrix):
             s = [x+y for x,y in zip(s, matrix[i])]
     if len(s):
         s = [x/len(matrix) for x in s]
-    #print 'haha'
-    #print(sum(s))
+
     return s
 
 def KL_pair_trivial(KL_matrix):
@@ -40,9 +41,9 @@ def KL_pair(KL_matrix, Topics_matrix):
     if(len(Topics_matrix) == 0):
         return np.array([])
     
-    past = [1.0/ len(Topics_matrix[0,])]*len(Topics_matrix[0,])
+    past = [1.0/ len(Topics_matrix[0])]*len(Topics_matrix[0])
     for i in xrange(len(Topics_matrix)):
-        cur = Topics_matrix[i,]
+        cur = Topics_matrix[i]
         global_kl.append(get_kl_dist(cur, past))
         past = get_mean_cols(Topics_matrix[0:i+1])
     
@@ -67,15 +68,17 @@ def KMC(pairs, n): #kmeans clustering on kl distance pairs
     colors = ['#4EACC5', '#FF9C34', '#4E9A06', '#FFD700', '#00FF7F', '#B22222', '#D02090', '#EED5B7']
 
     # KMeans Plot
-    fig = plt.figure(figsize=(8, 3))
-    ax = fig.add_subplot(1,1,1)
-    for k, col in zip(range(n), colors):
-        my_members = k_means_labels == k
-        cluster_center = k_means_cluster_centers[k]
-        ax.plot(pairs[my_members, 0], pairs[my_members, 1], 'w', markerfacecolor=col, marker='.')
-        ax.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col, markeredgecolor='k', markersize=6)
-
-    plt.show()
+    #fig = plt.figure(figsize=(8, 5))
+    #ax = fig.add_subplot(1,1,1)
+    #for k, col in zip(range(n), colors):
+    #   my_members = k_means_labels == k
+    #   cluster_center = k_means_cluster_centers[k]
+    #   ax.plot(pairs[my_members, 0], pairs[my_members, 1], 'w', markerfacecolor=col, marker='.')
+    #   ax.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col, markeredgecolor='k', markersize=6)
+    #   ax.set_xlabel('local suprise')
+    #   ax.set_ylabel('global suprise')
+    
+    #plt.show()
     return k_means
 
 def learn_KL_gaussian(k_means, pairs):
@@ -88,8 +91,37 @@ def learn_KL_gaussian(k_means, pairs):
         my_center = sum(pairs[my_members,:]) / len(pairs[my_members,:])#k_means_cluster_centers[k]
         my_data = pairs[my_members,:]
         my_cov = np.cov(my_data, rowvar = 0)
-        #print my_cov
         kGaussians.append(mGaussian(my_center, my_cov))
+    
+    matplotlib.rcParams['contour.negative_linestyle'] = 'solid'
+    # KMeans Plot
+#    colors = ['#4EACC5', '#FF9C34', '#4E9A06', '#FFD700', '#00FF7F', '#B22222', '#D02090', '#EED5B7']
+#    fig = plt.figure(figsize=(8, 5))
+#    ax = fig.add_subplot(1,1,1)
+#    for k, col in zip(range(n), colors):
+#        my_members = k_means_labels == k
+#        cluster_center = k_means_cluster_centers[k]
+#        ax.plot(pairs[my_members, 0], pairs[my_members, 1], 'w', markerfacecolor=col, marker='.')
+#        ax.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col, markeredgecolor='k', markersize=6)
+#
+#    for k in range(n):
+#        my_members = k_means_labels == k
+#        my_center = sum(pairs[my_members,:]) / len(pairs[my_members,:])#k_means_cluster_centers[k]
+#        my_data = pairs[my_members,:]
+#        
+#        my_data = np.sort(my_data, 0)
+#        my_cov = np.cov(my_data, rowvar = 0)
+#        
+#        #print np.array(pairs[1:20,0]), np.array(pairs[1:20,1])
+#        X, Y = np.meshgrid(np.array(my_data[:,0] ), np.array(my_data[:,1]) )
+#        Z = mlab.bivariate_normal(X, Y, sqrt(my_cov[0,0]), sqrt(my_cov[1,1]), my_center[0], my_center[1], my_cov[0,1]/sqrt(my_cov[0,0])/sqrt(my_cov[1,1]))
+#        CS = plt.contour(X,Y,Z,6)
+#
+#
+#    ax.set_xlabel('local suprise')
+#    ax.set_ylabel('global suprise')
+#    plt.show()
+
     return kGaussians
 
 def learn_from_KL(KL_matrix, Topics_matrix, n):
@@ -100,6 +132,14 @@ def learn_from_KL(KL_matrix, Topics_matrix, n):
         k_means_list.append(KMC(pairs, i))
 
     #k_means_t = KMC(pairs_t, n)
+    
+    fig = plt.figure(figsize=(8, 5))
+    ax = fig.add_subplot(1,1,1)
+    ax.plot(pairs[:, 0], pairs[:, 1], 'w', markerfacecolor='#000000', marker='.')
+    ax.set_xlabel('local suprise')
+    ax.set_ylabel('global suprise')
+    plt.show()
+    
     kGaussians = []
     for k_means in k_means_list:
         kGaussians = kGaussians + learn_KL_gaussian(k_means, pairs)

@@ -90,8 +90,9 @@ def decoding(pairs, kGaussians, n_epochs):
     for i in reversed(range(1,n_data)):
         best_state = pred[best_state][i]
         best_states.insert(0, best_state)
-    print best_states
+    print [(kGaussians[model_state_list[x].model].mean, kGaussians[model_state_list[best_states[i+1]].model].mean) for i,x in enumerate(best_states) if i+1 < len(best_states) and best_states[i] != best_states[i+1]]
+    return best_states
 
 def estimate_epochs(pairs, kGaussians, n_epochs):
     """wrapper: set the number of epochs to be the same with possible models"""
-    decoding(pairs, kGaussians, n_epochs)
+    return decoding(pairs, kGaussians, n_epochs)
