@@ -5,6 +5,7 @@ import numpy as np
 
 model_state_list = []
 
+
 def lognormpdf(x,mu,S):
     """ Calculate gaussian probability density of x, when x ~ N(mu,sigma) """
     nx = len(S)
@@ -24,7 +25,6 @@ def model_state_transit_okay(m1, m2):
 def init_state_list(k, n):
     """ We have k models and want to estimate n epochs """
     global model_state_list
-    print "caught you"
     print k,n
     for i in xrange(k):
         for j in xrange(n):
